@@ -2,6 +2,7 @@
 UI components for the Space Invaders game.
 """
 import pygame
+import os
 from engine.config import WHITE, BLACK, RED, GREEN
 
 class UI:
@@ -17,9 +18,18 @@ class UI:
         """
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.font_small = pygame.font.SysFont(None, 24)
-        self.font_medium = pygame.font.SysFont(None, 36)
-        self.font_large = pygame.font.SysFont(None, 72)
+        
+        # Load custom font
+        font_path = os.path.join('assets', 'Font', 'monogram.ttf')
+        try:
+            self.font_small = pygame.font.Font(font_path, 24)
+            self.font_medium = pygame.font.Font(font_path, 36)
+            self.font_large = pygame.font.Font(font_path, 72)
+        except FileNotFoundError:
+            print("Could not load custom font, falling back to system font")
+            self.font_small = pygame.font.SysFont(None, 24)
+            self.font_medium = pygame.font.SysFont(None, 36)
+            self.font_large = pygame.font.SysFont(None, 72)
     
     def draw_score(self, screen, score, high_score=None):
         """

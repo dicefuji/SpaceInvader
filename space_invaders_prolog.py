@@ -3,6 +3,7 @@ Space Invaders game with Prolog AI.
 """
 import sys
 import pygame
+import os
 
 from engine.config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, FPS, BLACK, WHITE,
@@ -96,6 +97,18 @@ def main():
     # Create UI
     ui = UI(SCREEN_WIDTH, SCREEN_HEIGHT)
     
+    # Load custom font for status and controls
+    font_path = os.path.join('assets', 'Font', 'monogram.ttf')
+    try:
+        status_font = pygame.font.Font(font_path, 24)
+        controls_font = pygame.font.Font(font_path, 24)
+        small_font = pygame.font.Font(font_path, 18)
+    except FileNotFoundError:
+        print("Could not load custom font, falling back to system font")
+        status_font = pygame.font.SysFont(None, 24)
+        controls_font = pygame.font.SysFont(None, 24)
+        small_font = pygame.font.SysFont(None, 18)
+    
     # Create Prolog bridge
     prolog_bridge = PrologBridge()
     
@@ -140,12 +153,11 @@ def main():
             ui.draw_menu(screen)
             
             # Draw Prolog status
-            font = pygame.font.SysFont(None, 24)
-            status = font.render(status_text, True, WHITE)
+            status = status_font.render(status_text, True, WHITE)
             screen.blit(status, (20, SCREEN_HEIGHT - 30))
             
             # Draw game controls
-            draw_game_controls(screen, pygame.font.SysFont(None, 24))
+            draw_game_controls(screen, controls_font)
             
         elif game_state.is_playing():
             # Get pressed keys for continuous movement
@@ -218,13 +230,14 @@ def main():
             ui.draw_score(screen, game_state.score, game_state.high_score)
             ui.draw_lives(screen, player.lives)
             
-            # Draw Prolog status
-            font = pygame.font.SysFont(None, 18)
-            status = font.render(status_text, True, WHITE)
-            screen.blit(status, (20, SCREEN_HEIGHT - 160))
+            # Draw game status
+            strategy_name = STRATEGY_NAMES.get(aliens.get_active_strategy(), "Unknown")
+            status_text = f"AI Strategy: {strategy_name}"
+            status = small_font.render(status_text, True, WHITE)
+            screen.blit(status, (20, SCREEN_HEIGHT - 20))
             
-            # Draw game controls
-            draw_game_controls(screen, pygame.font.SysFont(None, 16))
+            # Draw game controls in a smaller font
+            draw_game_controls(screen, small_font)
             
         elif game_state.is_game_over():
             # Draw game over screen

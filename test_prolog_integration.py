@@ -3,6 +3,7 @@ Test script for the Prolog AI integration with the core components.
 """
 import sys
 import pygame
+import os
 from engine.config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, FPS, BLACK, WHITE,
     ALIEN_ROWS, ALIEN_COLS, ALIEN_HORIZONTAL_SPACING, ALIEN_VERTICAL_SPACING,
@@ -88,6 +89,7 @@ class PrologAlienGroup(AlienGroup):
         self.bullets = []
         self.next_id = 1
         self.prolog_bridge = prolog_bridge
+        self.active_strategy = None
         
         # Limit rows to 3 for our three strategies
         actual_rows = min(rows, 3)
@@ -157,6 +159,15 @@ class PrologAlienGroup(AlienGroup):
         """
         return any(alien.y + alien.height >= bottom_y for alien in self.get_active_aliens())
 
+    def get_active_strategy(self):
+        """
+        Get the currently active AI strategy.
+        
+        Returns:
+            int or None: ID of the active strategy, or None if using default
+        """
+        return self.active_strategy
+
 def main():
     """Main function to test the Prolog integration."""
     # Initialize pygame
@@ -190,6 +201,14 @@ def main():
     # Create barrier group
     barrier_y = GAME_AREA_BOTTOM - 100
     barriers = BarrierGroup(BARRIER_COUNT, 0, SCREEN_WIDTH, barrier_y)
+    
+    # Load custom font
+    font_path = os.path.join('assets', 'Font', 'monogram.ttf')
+    try:
+        font = pygame.font.Font(font_path, 24)
+    except FileNotFoundError:
+        print("Could not load custom font, falling back to system font")
+        font = pygame.font.SysFont(None, 24)
     
     # Game loop
     running = True
@@ -250,7 +269,6 @@ def main():
         barriers.draw(screen)
         
         # Add simple instructions text
-        font = pygame.font.SysFont(None, 24)
         instructions = font.render(
             "Arrow keys to move, Space to shoot, Q to quit", 
             True, WHITE
