@@ -10,6 +10,7 @@ from engine.config import (
     BARRIER_COUNT, GAME_AREA_TOP, GAME_AREA_BOTTOM
 )
 from engine.player import Player
+from engine.smooth_player import SmoothPlayer
 from engine.alien import Alien
 from engine.barrier import BarrierGroup
 from engine.game_state import GameStateManager, GameState
@@ -59,7 +60,7 @@ def initialize_game_objects(prolog_bridge):
     # Create the player
     player_x = SCREEN_WIDTH // 2
     player_y = GAME_AREA_BOTTOM
-    player = Player(player_x, player_y)
+    player = SmoothPlayer(player_x, player_y)
     
     # Create alien group with Prolog integration
     alien_start_x = 50
@@ -157,14 +158,27 @@ def main():
             # Get pressed keys for continuous movement
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT]:
-                player.move_left()
+                player.start_move_left()
+            else:
+                player.stop_move_left()
             if keys[pygame.K_RIGHT]:
-                player.move_right()
+                player.start_move_right()
+            else:
+                player.stop_move_right()
             
             # Update game objects
             player.update()
             aliens.update(player, barriers.barriers)  # Pass player and barriers for Prolog
             barriers.update()
+            
+            # Perform multiple smooth updates for player within one game frame
+            # Increased the number of updates per frame for smoother movement
+            for _ in range(player.subframes):
+                player.update_smooth()
+                
+                # Also update player bullets for smoother movement
+                for bullet in player.get_active_bullets():
+                    bullet.update()
             
             # Check collisions
             

@@ -21,6 +21,29 @@ The game has been optimized for faster gameplay with the following changes:
 
 These changes create a more engaging and challenging experience while maintaining balanced gameplay.
 
+## Dual Update System
+
+To create a contrast between the classic frame-by-frame alien movement and smoother player controls, a dual update system has been implemented:
+
+1. **SmoothPlayer Class**:
+   - Player movement updates 10 times per game frame for ultra-smooth animation
+   - Uses floating-point positions for sub-pixel movement precision
+   - Provides continuous, responsive movement without affecting alien behavior
+   - Reduced cooldown time (3 frames) for more responsive shooting
+
+2. **SmoothBullet Class**:
+   - Player bullets also update at the higher subframe rate (10 updates per frame)
+   - Smoother bullet trajectory with floating-point position tracking
+   - Much faster bullet speed (40 units vs. original 10)
+   - More responsive shooting experience
+
+3. **Classic Alien Movement**:
+   - Aliens maintain their deliberate frame-by-frame movement
+   - The contrast enhances the classic Space Invaders feel
+   - Alien bullets remain slower to maintain the original gameplay balance
+
+This dual system provides the best of both worlds: ultra-responsive player controls with the classic alien movement style. The player's ship now moves without any perceptible lag, while aliens keep their characteristic movement pattern.
+
 ## Implementation Details
 
 ### Files Created/Modified

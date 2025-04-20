@@ -2,7 +2,7 @@
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Space Invaders with Prolog AI"
-FPS = 60
+FPS = 60  # Base frame rate for the overall game
 
 # Colors
 BLACK = (0, 0, 0)
@@ -14,8 +14,8 @@ BLUE = (0, 0, 255)
 # Player settings
 PLAYER_WIDTH = 60
 PLAYER_HEIGHT = 40
-PLAYER_SPEED = 50
-PLAYER_BULLET_SPEED = 30
+PLAYER_SPEED = 40  # Adjusted for optimal player movement
+PLAYER_BULLET_SPEED = 40  # Increased for faster bullets
 
 # Alien settings
 ALIEN_WIDTH = 50
@@ -24,9 +24,9 @@ ALIEN_HORIZONTAL_SPACING = 10
 ALIEN_VERTICAL_SPACING = 10
 ALIEN_ROWS = 5
 ALIEN_COLS = 11
-ALIEN_HORIZONTAL_SPEED = 10
+ALIEN_HORIZONTAL_SPEED = 10  # Kept deliberately slow for classic movement
 ALIEN_VERTICAL_SPEED = 20
-ALIEN_BULLET_SPEED = 10
+ALIEN_BULLET_SPEED = 10  # Kept slow for classic alien bullet movement
 
 # Barrier settings
 BARRIER_COUNT = 4
