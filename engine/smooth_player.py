@@ -8,6 +8,7 @@ from engine.config import (
     SCREEN_WIDTH, GREEN, BULLET_WIDTH, BULLET_HEIGHT,
     PLAYER_BULLET_SPEED
 )
+from engine.sprites import load_sprite, SPACESHIP_SPRITE
 
 class SmoothBullet(Bullet):
     """Enhanced bullet with smoother movement."""
@@ -23,6 +24,27 @@ class SmoothBullet(Bullet):
         self.y = float(self.y)
         # We use the full speed rather than dividing to ensure bullets move fast enough
         self.speed = self.base_speed
+        # Make player bullets slightly wider
+        self.width = BULLET_WIDTH + 2
+        self.rect.width = self.width
+    
+    def draw(self, screen):
+        """Custom draw method for player bullets with a distinctive look."""
+        if not self.active:
+            return
+            
+        # Draw a sleek bullet shape
+        color = (0, 255, 255)  # Cyan color for player bullets
+        # Main bullet body
+        pygame.draw.rect(screen, color, pygame.Rect(self.x, self.y, self.width, self.height))
+        # Bullet trail (smaller rectangles that fade)
+        trail_length = 3
+        for i in range(1, trail_length + 1):
+            alpha = 255 - (i * 70)  # Decreasing alpha for fade effect
+            trail_color = (*color, alpha)
+            trail_surface = pygame.Surface((self.width, self.height // 2), pygame.SRCALPHA)
+            trail_surface.fill(trail_color)
+            screen.blit(trail_surface, (self.x, self.y + (i * self.height // 2)))
     
     def update(self):
         """Update bullet position with smoother movement."""
@@ -38,7 +60,7 @@ class SmoothBullet(Bullet):
 class SmoothPlayer(Player):
     """Player with smoother movement that updates at a higher rate than aliens."""
     
-    def __init__(self, x, y, lives=3, subframes=10):
+    def __init__(self, x, y, lives=3, subframes=60):
         """
         Initialize the smooth player spaceship.
         
@@ -55,12 +77,15 @@ class SmoothPlayer(Player):
         # Use float for precise movement
         self.x = float(self.x)
         self.y = float(self.y)
-        # We use full speed to make movement more responsive
-        self.speed = self.base_speed
+        # Use a constant high speed instead of scaling with subframes
+        self.speed = 40  # A fixed value regardless of game state
         self.moving_left = False
         self.moving_right = False
         # Lower the cooldown time to make shooting more responsive
-        self.cooldown_time = 3
+        self.cooldown_time = 2  # Further reduced from 3
+        
+        # Load the spaceship sprite
+        self.image = load_sprite(SPACESHIP_SPRITE, (PLAYER_WIDTH, PLAYER_HEIGHT))
     
     def start_move_left(self):
         """Begin moving left."""

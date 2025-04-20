@@ -11,17 +11,11 @@ from engine.config import (
 from engine.player import Player
 from engine.alien import AlienGroup, Alien, AlienBullet
 from engine.barrier import BarrierGroup
+from engine.sprites import load_sprite, ALIEN_SPRITES
 from ai.cli_prolog_bridge import CLIPrologBridge as PrologBridge
 
 class PrologAlien(Alien):
     """Alien that uses Prolog for firing decision making."""
-    
-    # Define strategy colors
-    STRATEGY_COLORS = {
-        1: (255, 0, 0),    # Red - Direct targeting
-        2: (0, 255, 0),    # Green - Predictive targeting
-        3: (255, 255, 0),  # Yellow - Coordinated firing
-    }
     
     def __init__(self, x, y, row, col, prolog_bridge, alien_id=None):
         """
@@ -40,11 +34,12 @@ class PrologAlien(Alien):
         self.firing_cooldown = 0
         self.firing_cooldown_time = 30  # Reduced from 30 for more frequent firing opportunities
         
-        # Set color based on row (strategy)
-        # We only have 3 rows now:
-        # Row 0 (top) uses strategy 1, row 1 uses strategy 2, row 2 uses strategy 3
-        strategy = min(row + 1, 3)  # Ensure we don't exceed available strategies
-        self.color = self.STRATEGY_COLORS.get(strategy, (255, 255, 255))
+        # Determine alien type based on row (we have 3 alien types)
+        alien_type = min(row + 1, 3)  # Ensure we don't exceed available sprites
+        
+        # Load the appropriate sprite
+        sprite_path = ALIEN_SPRITES[alien_type]
+        self.image = load_sprite(sprite_path, (ALIEN_WIDTH, ALIEN_HEIGHT))
     
     def update(self):
         """Update alien's state - only handling cooldown here."""
@@ -71,26 +66,9 @@ class PrologAlien(Alien):
         
         # Use Prolog for decision
         return self.prolog_bridge.should_alien_fire(self.id)
-    
-    def draw(self, screen):
-        """
-        Draw the alien with its strategy color.
-        
-        Args:
-            screen: Pygame surface to draw on
-        """
-        # Use custom colors for each row/strategy
-        pygame.draw.rect(screen, self.color, self.rect)
 
 class PrologAlienGroup(AlienGroup):
     """Group of aliens with Prolog-controlled firing behavior."""
-    
-    # Strategy colors for easier reference in other modules
-    ALIEN_COLORS = {
-        1: (255, 0, 0),    # Red - Direct targeting
-        2: (0, 255, 0),    # Green - Predictive targeting
-        3: (255, 255, 0),  # Yellow - Coordinated firing
-    }
     
     def __init__(self, rows, cols, start_x, start_y, h_spacing, v_spacing, prolog_bridge):
         """

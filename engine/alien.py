@@ -26,6 +26,25 @@ class AlienBullet(Entity):
         
         super().__init__(bullet_x, y, BULLET_WIDTH, BULLET_HEIGHT, RED)
         self.speed = ALIEN_BULLET_SPEED
+        # Make alien bullet slightly wider and with a unique shape
+        self.width = BULLET_WIDTH + 2
+        self.rect.width = self.width
+    
+    def draw(self, screen):
+        """Custom draw method for alien bullets with a distinctive look."""
+        if not self.active:
+            return
+            
+        # Draw a small 'lightning bolt' shape instead of a rectangle
+        points = [
+            (self.x, self.y),  # Top point
+            (self.x + self.width, self.y),  # Top right
+            (self.x + self.width - 2, self.y + self.height // 2),  # Middle right
+            (self.x + self.width, self.y + self.height),  # Bottom right
+            (self.x, self.y + self.height),  # Bottom left
+            (self.x + 2, self.y + self.height // 2),  # Middle left
+        ]
+        pygame.draw.polygon(screen, RED, points)
     
     def update(self):
         """Move the bullet downward."""

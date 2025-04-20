@@ -28,25 +28,25 @@ STRATEGY_NAMES = {
     5: "Barrier Avoiding"
 }
 
-def draw_strategy_legend(screen, font):
+def draw_game_controls(screen, font):
     """
-    Draw a legend explaining the alien colors and strategies.
+    Draw the game controls information.
     
     Args:
         screen: Pygame surface to draw on
         font: Pygame font to use for text
     """
-    strategies = [
-        ("RED: Row 1 - Direct Targeting", (255, 0, 0)),
-        ("GREEN: Row 2 - Predictive Targeting", (0, 255, 0)),
-        ("BLUE: Row 3 - Random Firing", (0, 0, 255)),
-        ("YELLOW: Row 4 - Coordinated Firing", (255, 255, 0)),
-        ("PURPLE: Row 5 - Barrier Avoidance", (255, 0, 255))
+    controls = [
+        "Controls:",
+        "LEFT/RIGHT: Move player",
+        "SPACE: Shoot",
+        "Q: Quit game",
+        "ENTER: Start/Restart game"
     ]
     
     y_pos = SCREEN_HEIGHT - 140
-    for desc, color in strategies:
-        text = font.render(desc, True, color)
+    for line in controls:
+        text = font.render(line, True, WHITE)
         screen.blit(text, (20, y_pos))
         y_pos += 20
 
@@ -102,8 +102,8 @@ def main():
     # Initialize game objects
     player, aliens, barriers = initialize_game_objects(prolog_bridge)
     
-    # Set up Prolog-specific UI elements
-    prolog_status_text = "Prolog AI: Active - Using Row-Based Strategies"
+    # Set up UI elements
+    status_text = "Space Invaders with Prolog AI"
     
     # Game loop
     running = True
@@ -130,13 +130,6 @@ def main():
                         game_won = False
                 elif event.key == pygame.K_SPACE and game_state.is_playing():
                     player.shoot()
-                
-                # Strategy keys no longer used for global strategy
-                # Now only used to toggle back to row-based mode
-                elif event.key == pygame.K_0:
-                    # Reset to row-based strategy mode
-                    prolog_bridge.set_strategy(None)
-                    prolog_status_text = f"Prolog AI: Active - Using Row-Based Strategies"
         
         # Clear the screen
         screen.fill(BLACK)
@@ -148,11 +141,11 @@ def main():
             
             # Draw Prolog status
             font = pygame.font.SysFont(None, 24)
-            status = font.render(prolog_status_text, True, WHITE)
+            status = font.render(status_text, True, WHITE)
             screen.blit(status, (20, SCREEN_HEIGHT - 30))
             
-            # Draw strategy legend
-            draw_strategy_legend(screen, pygame.font.SysFont(None, 24))
+            # Draw game controls
+            draw_game_controls(screen, pygame.font.SysFont(None, 24))
             
         elif game_state.is_playing():
             # Get pressed keys for continuous movement
@@ -227,11 +220,11 @@ def main():
             
             # Draw Prolog status
             font = pygame.font.SysFont(None, 18)
-            status = font.render(prolog_status_text, True, WHITE)
+            status = font.render(status_text, True, WHITE)
             screen.blit(status, (20, SCREEN_HEIGHT - 160))
             
-            # Draw the strategy legend
-            draw_strategy_legend(screen, pygame.font.SysFont(None, 16))
+            # Draw game controls
+            draw_game_controls(screen, pygame.font.SysFont(None, 16))
             
         elif game_state.is_game_over():
             # Draw game over screen
