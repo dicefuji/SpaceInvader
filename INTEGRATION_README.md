@@ -4,6 +4,23 @@
 
 This project implements a CLI-based Prolog bridge for the Space Invaders game to resolve compatibility issues between PySwip and newer versions of SWI-Prolog, particularly on macOS with Apple Silicon. The implementation follows a drop-in replacement strategy to minimize code changes while maintaining functionality.
 
+## Speed Improvements
+
+The game has been optimized for faster gameplay with the following changes:
+
+1. **Increased Frame Rate**: FPS increased from 60 to 75 for smoother gameplay
+2. **Faster Movement**:
+   - Alien horizontal speed doubled (1 → 2)
+   - Player speed increased (5 → 7)
+3. **Faster Projectiles**:
+   - Alien bullet speed increased (5 → 7)
+   - Player bullet speed increased (10 → 12)
+4. **More Dynamic Gameplay**:
+   - Reduced alien firing cooldown (30 → 20 frames)
+   - Increased alien speed progression factor (0.2 → 0.3)
+
+These changes create a more engaging and challenging experience while maintaining balanced gameplay.
+
 ## Implementation Details
 
 ### Files Created/Modified

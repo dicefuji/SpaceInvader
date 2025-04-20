@@ -38,7 +38,7 @@ class PrologAlien(Alien):
         super().__init__(x, y, row, col, alien_id)
         self.prolog_bridge = prolog_bridge
         self.firing_cooldown = 0
-        self.firing_cooldown_time = 30  # Frames between possible firing attempts
+        self.firing_cooldown_time = 30  # Reduced from 30 for more frequent firing opportunities
         
         # Set color based on row (strategy)
         # We only have 3 rows now:

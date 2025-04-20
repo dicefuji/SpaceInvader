@@ -14,8 +14,8 @@ BLUE = (0, 0, 255)
 # Player settings
 PLAYER_WIDTH = 60
 PLAYER_HEIGHT = 40
-PLAYER_SPEED = 5
-PLAYER_BULLET_SPEED = 10
+PLAYER_SPEED = 50
+PLAYER_BULLET_SPEED = 30
 
 # Alien settings
 ALIEN_WIDTH = 50
@@ -24,9 +24,9 @@ ALIEN_HORIZONTAL_SPACING = 10
 ALIEN_VERTICAL_SPACING = 10
 ALIEN_ROWS = 5
 ALIEN_COLS = 11
-ALIEN_HORIZONTAL_SPEED = 1
+ALIEN_HORIZONTAL_SPEED = 10
 ALIEN_VERTICAL_SPEED = 20
-ALIEN_BULLET_SPEED = 5
+ALIEN_BULLET_SPEED = 10
 
 # Barrier settings
 BARRIER_COUNT = 4
@@ -45,4 +45,4 @@ BULLET_WIDTH = 4
 BULLET_HEIGHT = 10
 
 # Game progression
-ALIEN_SPEED_INCREASE = 0.2  # How much to increase alien speed when aliens are destroyed 
+ALIEN_SPEED_INCREASE = 0.3  # Increased from 0.2 - How much to increase alien speed when aliens are destroyed 
