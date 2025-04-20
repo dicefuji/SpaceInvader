@@ -16,7 +16,7 @@ from engine.config import (
 )
 from engine.player import Player
 from engine.barrier import BarrierGroup
-from ai.prolog_bridge import PrologBridge
+from ai.cli_prolog_bridge import CLIPrologBridge as PrologBridge
 from test_prolog_integration import PrologAlienGroup, PrologAlien, ALIEN_WIDTH, ALIEN_HEIGHT
 
 # Initialize pygame
@@ -347,9 +347,8 @@ def main():
     # Initialize player
     player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50)
     
-    # Initialize Prolog bridge (may fail)
+    # Initialize Prolog bridge
     prolog_bridge = PrologBridge()
-    print(f"Prolog initialization {'succeeded' if prolog_bridge.initialized else 'failed'}")
     
     # Initialize alien group with 3 rows (for our 3 strategies) and 8 columns
     alien_group = PrologAlienGroup(3, 8, 50, 50, 20, 20, prolog_bridge)
@@ -398,9 +397,6 @@ def main():
         for alien in alien_group.aliens:
             # Update alien
             alien.update()
-            
-            # Set player position for fallback behavior
-            alien.player_pos = (player.x, player.y)
             
             # Check if alien should fire
             if alien.should_fire():

@@ -15,7 +15,7 @@ from engine.barrier import BarrierGroup
 from engine.game_state import GameStateManager, GameState
 from engine.ui import UI
 from test_prolog_integration import PrologAlienGroup
-from ai.prolog_bridge import PrologBridge
+from ai.cli_prolog_bridge import CLIPrologBridge as PrologBridge
 
 # Define strategy names for display
 STRATEGY_NAMES = {
@@ -102,11 +102,7 @@ def main():
     player, aliens, barriers = initialize_game_objects(prolog_bridge)
     
     # Set up Prolog-specific UI elements
-    prolog_status_text = ""
-    if prolog_bridge.initialized:
-        prolog_status_text = f"Prolog AI: Active - Using Row-Based Strategies"
-    else:
-        prolog_status_text = "Prolog AI: Not available (using default behavior)"
+    prolog_status_text = "Prolog AI: Active - Using Row-Based Strategies"
     
     # Game loop
     running = True

@@ -9,6 +9,17 @@ The Prolog AI system consists of:
 1. **Knowledge Base** (`invader_ai.pl`): Contains facts and rules for decision-making
 2. **Python-Prolog Bridge** (`prolog_bridge.py`): Handles communication between Python game engine and Prolog
 
+## Requirements
+
+This implementation requires:
+
+1. **PySwip**: The Python interface to SWI-Prolog
+   - Install with `pip install pyswip`
+2. **SWI-Prolog**: Must be installed and accessible on your system
+   - Download from [SWI-Prolog website](https://www.swi-prolog.org/download.html)
+
+Prolog is a hard requirement for this project. The game cannot run without a working Prolog installation.
+
 ## AI Strategies
 
 The game implements multiple firing strategies that can be selected during gameplay by pressing the number keys 0-5:
@@ -108,4 +119,16 @@ The `PrologBridge` class handles:
 2. Updating the knowledge base with the current game state
 3. Querying the Prolog engine for firing decisions
 4. Setting and changing strategies during gameplay
-5. Providing fallback behavior when Prolog is unavailable 
+
+## Testing
+
+You can test if your Prolog installation is working correctly with the included test script:
+
+```
+python test_required_prolog.py
+```
+
+This will verify that:
+1. PySwip can connect to your SWI-Prolog installation
+2. The knowledge base can be loaded successfully
+3. Basic queries work as expected 

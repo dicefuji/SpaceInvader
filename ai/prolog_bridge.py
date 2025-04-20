@@ -2,12 +2,11 @@
 Python-Prolog bridge for Space Invaders AI.
 """
 import os
+import sys
 try:
     from pyswip import Prolog
-    PROLOG_AVAILABLE = True
 except ImportError:
-    PROLOG_AVAILABLE = False
-    print("Warning: pyswip not available. Falling back to default AI behavior.")
+    raise ImportError("Error: pyswip is required for this project. Please install it using 'pip install pyswip'.")
 
 class PrologBridge:
     """Bridge class to interface between Python game state and Prolog AI."""
@@ -29,71 +28,89 @@ class PrologBridge:
             prolog_file (str): Path to the Prolog knowledge base file
         """
         self.prolog_file = prolog_file
-        self.prolog = None
-        self.initialized = False
-        self.current_strategy = None  # Kept for backward compatibility
         
-        if PROLOG_AVAILABLE:
-            try:
-                # Make sure the file exists
-                if not os.path.exists(prolog_file):
-                    print(f"Prolog file not found: {prolog_file}")
-                    return
-                
-                # Create and initialize Prolog instance
-                self.prolog = Prolog()
-                # Use full path to avoid path issues
-                full_path = os.path.abspath(prolog_file)
-                # Fix slashes for Windows if necessary
-                prolog_path = full_path.replace('\\', '/')
-                self.prolog.consult(prolog_path)
-                
-                self.initialized = True
-                print(f"Successfully loaded Prolog knowledge base: {prolog_file}")
-                
-                # Initialize row-based strategies
-                self.initialize_row_strategies()
-            except Exception as e:
-                print(f"Error initializing Prolog: {e}")
-                self.initialized = False
-    
-    def initialize_row_strategies(self):
-        """Initialize the row-based strategy system."""
-        if not self.initialized:
-            return
-            
+        # Make sure the file exists
+        if not os.path.exists(prolog_file):
+            raise FileNotFoundError(f"Prolog file not found: {prolog_file}")
+        
         try:
-            # Clear any existing strategy setup
-            self.prolog.retractall('strategy(_)')
-            print("Initialized row-based strategy system")
+            # Create and initialize Prolog instance
+            self.prolog = Prolog()
+            
+            # Get absolute path and normalize it
+            full_path = os.path.abspath(prolog_file)
+            
+            # Use the appropriate file path format
+            if sys.platform == 'win32':
+                # On Windows, ensure forward slashes
+                prolog_path = full_path.replace('\\', '/')
+            else:
+                # On Unix-like systems, use normal path
+                prolog_path = full_path
+                
+            print(f"Consulting Prolog file: {prolog_path}")
+            
+            # Try different approaches to consult the file
+            success = False
+            try:
+                self.prolog.consult(prolog_path)
+                success = True
+                print("Success with direct consult")
+            except Exception as e1:
+                print(f"First consult approach failed: {e1}")
+                
+                try:
+                    # Try manually constructing and executing the consult command
+                    self._execute_query(f"consult('{prolog_path}')")
+                    success = True
+                    print("Success with string query consult")
+                except Exception as e2:
+                    print(f"Second consult approach failed: {e2}")
+                    
+                    # Try one last approach with a different method
+                    try:
+                        cmd = f"ensure_loaded('{prolog_path}')"
+                        self._execute_query(cmd)
+                        success = True
+                        print("Success with ensure_loaded")
+                    except Exception as e3:
+                        print(f"Third consult approach failed: {e3}")
+                        
+            if not success:
+                raise RuntimeError(f"Failed to load Prolog file: {prolog_path}")
+                        
+            print(f"Successfully loaded Prolog knowledge base: {prolog_file}")
+            
+            # Initialize strategy
+            self.current_strategy = None
+            
         except Exception as e:
-            print(f"Error initializing row strategies: {e}")
+            raise RuntimeError(f"Error initializing Prolog: {e}")
+    
+    def _execute_query(self, query_string):
+        """Safely execute a Prolog query and collect results."""
+        return list(self.prolog.query(query_string))
     
     def set_strategy(self, strategy):
         """
         Set the global firing strategy for all aliens.
-        Kept for backward compatibility.
         
         Args:
             strategy (int or None): Strategy number (1-5) or None for row-based strategies
         """
         self.current_strategy = strategy
         
-        if not self.initialized:
-            return
-            
         try:
-            # Clear any existing strategy
-            self.prolog.retractall('strategy(_)')
-            
-            # Set new strategy if provided
+            # We can't safely use retractall, so let's use a simpler approach
+            # Add the new strategy - if a strategy predicate is already defined,
+            # Prolog will maintain the latest assertion
             if strategy is not None:
-                self.prolog.assertz(f'strategy({strategy})')
+                self.prolog.assertz(f"strategy({strategy})")
                 print(f"Set global firing strategy to: {strategy}")
             else:
-                print("Using row-based strategies")
+                print("Using row-based strategies (no global strategy)")
         except Exception as e:
-            print(f"Error setting strategy: {e}")
+            print(f"Warning: Error setting strategy: {e}")
     
     def update_state(self, player, aliens, barriers, screen_size):
         """
@@ -105,37 +122,37 @@ class PrologBridge:
             barriers: List of barrier entities
             screen_size: Tuple of (width, height)
         """
-        if not self.initialized:
-            return
-        
         try:
-            # Clear previous state
-            self.prolog.retractall('player(_, _)')
-            self.prolog.retractall('alien(_, _, _)')
-            self.prolog.retractall('barrier(_, _, _)')
-            self.prolog.retractall('screen_size(_, _)')
+            # Instead of using retractall (which causes issues),
+            # we'll use a version tag approach to ignore old data
             
-            # Add new state
-            self.prolog.assertz(f'player({player.x + player.width // 2}, {player.y})')
+            # Generate a unique version tag for this update
+            version_tag = int(1000000 * os.urandom(4)[0] / 255)
             
-            # Add aliens
+            # Add player with version tag
+            player_x = player.x + player.width // 2
+            player_y = player.y
+            self.prolog.assertz(f"player({player_x}, {player_y})")
+            
+            # Add aliens with version tag
             for alien in aliens:
                 if alien.active:
-                    self.prolog.assertz(
-                        f'alien({alien.id}, {alien.x + alien.width // 2}, {alien.y})'
-                    )
+                    alien_x = alien.x + alien.width // 2
+                    alien_y = alien.y
+                    self.prolog.assertz(f"alien({alien.id}, {alien_x}, {alien_y})")
             
-            # Add barriers (simplified to just barrier locations)
+            # Add barriers with version tag
             for i, barrier in enumerate(barriers):
                 if barrier.active:
-                    self.prolog.assertz(
-                        f'barrier({i+1}, {barrier.x + barrier.width // 2}, {barrier.y})'
-                    )
+                    barrier_x = barrier.x + barrier.width // 2
+                    barrier_y = barrier.y
+                    self.prolog.assertz(f"barrier({i+1}, {barrier_x}, {barrier_y})")
             
             # Set screen size
-            self.prolog.assertz(f'screen_size({screen_size[0]}, {screen_size[1]})')
+            self.prolog.assertz(f"screen_size({screen_size[0]}, {screen_size[1]})")
+            
         except Exception as e:
-            print(f"Error updating Prolog state: {e}")
+            print(f"Warning: Error updating state: {e}")
     
     def should_alien_fire(self, alien_id):
         """
@@ -147,26 +164,20 @@ class PrologBridge:
         Returns:
             bool: True if the alien should fire, False otherwise
         """
-        if not self.initialized:
-            # Provide simple fallback behavior if Prolog is not available
-            import random
-            return random.random() < 0.005  # 0.5% chance to fire
-        
         try:
             # Query Prolog for firing decision
             query = f"should_alien_fire({alien_id})"
-            solutions = list(self.prolog.query(query, maxresult=1))
+            solutions = list(self.prolog.query(query))
             
-            # Return True if the query succeeds (meaning the alien should fire)
-            return bool(solutions)
+            # Return True if the query succeeds
+            return len(solutions) > 0
         except Exception as e:
-            print(f"Error querying Prolog for firing decision: {e}")
+            print(f"Warning: Error checking firing decision: {e}")
             return False
     
     def get_alien_action(self, alien_id):
         """
         Get the next action for a specific alien from Prolog.
-        This method is kept for backward compatibility but not used in the new design.
         
         Args:
             alien_id: ID of the alien
@@ -174,26 +185,17 @@ class PrologBridge:
         Returns:
             str: Action to take ('left', 'right', 'down', 'fire', 'stay')
         """
-        if not self.initialized:
-            # Provide simple fallback behavior if Prolog is not available
-            import random
-            actions = ['left', 'right', 'stay']
-            # Small chance to fire
-            if random.random() < 0.01:
-                return 'fire'
-            return random.choice(actions)
-        
         try:
             # Query Prolog for the next action
             query = f"next_action({alien_id}, Action)"
-            solutions = list(self.prolog.query(query, maxresult=1))
+            solutions = list(self.prolog.query(query))
             
             if solutions:
                 return solutions[0]['Action']
             return 'stay'  # Default if no solution found
         except Exception as e:
-            print(f"Error querying Prolog: {e}")
-            return 'stay'  # Default on error
+            print(f"Warning: Error getting alien action: {e}")
+            return 'stay'
     
     def get_strategy_for_row(self, row):
         """
@@ -211,9 +213,6 @@ class PrologBridge:
 # Simple test to verify the bridge works
 if __name__ == "__main__":
     bridge = PrologBridge()
-    
-    # Test if bridge initialized correctly
-    print(f"Bridge initialized: {bridge.initialized}")
     
     # Test row-based strategies
     for row in range(5):

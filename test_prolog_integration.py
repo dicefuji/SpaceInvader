@@ -11,7 +11,7 @@ from engine.config import (
 from engine.player import Player
 from engine.alien import AlienGroup, Alien, AlienBullet
 from engine.barrier import BarrierGroup
-from ai.prolog_bridge import PrologBridge
+from ai.cli_prolog_bridge import CLIPrologBridge as PrologBridge
 
 class PrologAlien(Alien):
     """Alien that uses Prolog for firing decision making."""
@@ -39,8 +39,6 @@ class PrologAlien(Alien):
         self.prolog_bridge = prolog_bridge
         self.firing_cooldown = 0
         self.firing_cooldown_time = 30  # Frames between possible firing attempts
-        self.player_pos = None  # Store player position for fallback behavior
-        self.barrier_positions = []  # Store barrier positions for fallback behavior
         
         # Set color based on row (strategy)
         # We only have 3 rows now:
@@ -59,10 +57,10 @@ class PrologAlien(Alien):
             
     def should_fire(self, firing_chance=None):
         """
-        Determine if the alien should fire using Prolog or fallback strategy.
+        Determine if the alien should fire using Prolog.
         
         Args:
-            firing_chance: Not used, decision comes from Prolog or fallback
+            firing_chance: Not used, decision comes from Prolog
             
         Returns:
             bool: True if the alien should fire, False otherwise
@@ -71,83 +69,9 @@ class PrologAlien(Alien):
         if self.firing_cooldown > 0:
             return False
         
-        # Try to use Prolog first
-        if self.prolog_bridge.initialized:
-            return self.prolog_bridge.should_alien_fire(self.id)
-        else:
-            # Use fallback strategy based on row
-            strategy = min(self.row + 1, 3)  # Convert 0-based row to 1-based strategy (max 3)
-            return self.should_fire_fallback(strategy)
+        # Use Prolog for decision
+        return self.prolog_bridge.should_alien_fire(self.id)
     
-    def should_fire_fallback(self, strategy):
-        """
-        Fallback firing decision when Prolog is not available.
-        
-        Args:
-            strategy: Strategy number (1-3)
-            
-        Returns:
-            bool: True if the alien should fire, False otherwise
-        """
-        import random
-        
-        # We need player position for most strategies
-        if self.player_pos is None:
-            return False
-            
-        player_x = self.player_pos[0]
-        
-        # Direct targeting (strategy 1)
-        if strategy == 1:
-            # Fire when player is directly below
-            if abs(self.x + self.width/2 - player_x) < 20:
-                return random.random() < 0.3  # 30% chance
-            return False
-            
-        # Predictive targeting (strategy 2)
-        elif strategy == 2:
-            # Simple prediction - aim ahead of player
-            screen_center = 400  # Assuming 800 width screen
-            if player_x < screen_center:
-                predicted_x = player_x + 30
-            else:
-                predicted_x = player_x - 30
-                
-            if abs(self.x + self.width/2 - predicted_x) < 25:
-                return random.random() < 0.25  # 25% chance
-            return False
-            
-        # Coordinated firing (strategy 3)
-        elif strategy == 3:
-            # Only bottom aliens fire
-            if self.is_bottom_alien():
-                return random.random() < 0.1  # 10% chance
-            return False
-            
-        # Default
-        return random.random() < 0.005  # 0.5% fallback
-    
-    def is_bottom_alien(self):
-        """Check if this alien is in the bottom row (no aliens below it)."""
-        # This is a simplified check and would need actual alien positions 
-        # for a real implementation. For demo purposes we'll use row.
-        return self.row == 2  # Row 2 is the bottom row (0-based) for 3 rows
-        
-    def barrier_in_path(self):
-        """Check if there's a barrier in the firing path."""
-        # Simplified check - would need actual barriers data
-        # For demo we'll just return False (no barriers)
-        alien_center_x = self.x + self.width/2
-        
-        for barrier_pos in self.barrier_positions:
-            barrier_x, barrier_y = barrier_pos
-            # If barrier is below us and in line with our shot
-            if (self.y < barrier_y and 
-                abs(alien_center_x - barrier_x) < 40):
-                return True
-                
-        return False
-        
     def draw(self, screen):
         """
         Draw the alien with its strategy color.
@@ -213,11 +137,6 @@ class PrologAlienGroup(AlienGroup):
         if player and barriers is not None:
             screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
             self.prolog_bridge.update_state(player, self.aliens, barriers, screen_size)
-            
-            # For fallback behavior, update player and barrier positions in all aliens
-            for alien in self.get_active_aliens():
-                alien.player_pos = (player.x + player.width // 2, player.y)
-                alien.barrier_positions = [(b.x + b.width // 2, b.y) for b in barriers if b.active]
         
         # Standard movement logic - same as in the original AlienGroup
         should_reverse = any(alien.should_reverse() for alien in self.get_active_aliens())
