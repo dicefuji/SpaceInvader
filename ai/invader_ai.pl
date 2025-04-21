@@ -16,7 +16,7 @@ Space Invaders AI in Prolog
 % Each row uses a specific strategy based on its position
 strategy_for_row(1, 1).  % Row 1: Direct targeting
 strategy_for_row(2, 2).  % Row 2: Predictive targeting  
-strategy_for_row(3, 3).  % Row 3: Coordinated firing
+strategy_for_row(3, 3).  % Row 3: Crossfire Trap Pattern
 
 % Helper predicate to determine row number based on y-coordinate
 alien_row(Y, 1) :- Y =< 150, !.
@@ -80,13 +80,65 @@ should_fire_predictive(AlienID) :-
     random(0, 100, R),
     R < 25.  % Keep original 25% chance to avoid making it too difficult
 
-% Strategy 3: Coordinated Firing
-% Only aliens in bottom row of each column fire
+% Strategy 3: Crossfire Trap Pattern
+% Bottom row aliens coordinate to create a trap zone around the player
 should_fire_coordinated(AlienID) :-
-    alien(AlienID, _, AlienY),
+    alien(AlienID, AlienX, AlienY),
+    player(PlayerX, _),
+    
+    % Only bottom-row aliens participate in coordinated firing
     \+ (alien(_, _, Y), Y > AlienY),  % No aliens below this one
-    random(0, 100, R),
-    R < 10.
+    
+    % Track player movement direction for smarter prediction
+    (last_player_x(LastX) -> 
+        (PlayerX > LastX + 2 -> Direction = 1 ; 
+         PlayerX < LastX - 2 -> Direction = -1 ; 
+         Direction = 0),
+        retract(last_player_x(_)),
+        assert(last_player_x(PlayerX))
+        ;
+        Direction = 0,  % Default if no previous position
+        assert(last_player_x(PlayerX))
+    ),
+    
+    % Define the trap zone positions (computationally efficient)
+    % Center position is always the players current position
+    CenterPos = PlayerX,
+    
+    % Left and right trap positions with variable offset based on movement
+    % More aggressive trap in the direction the player is moving
+    LeftOffset is 50 + (Direction * -15),  % Wider if moving left
+    RightOffset is 50 + (Direction * 15),  % Wider if moving right
+    LeftPos is PlayerX - LeftOffset,
+    RightPos is PlayerX + RightOffset,
+    
+    % Ensure trap positions are within screen bounds
+    screen_size(Width, _),
+    BoundedLeftPos is max(40, LeftPos),
+    BoundedRightPos is min(Width - 40, RightPos),
+    
+    % Calculate distance from alien to each trap point to determine best target
+    DistToCenter is abs(AlienX - CenterPos),
+    DistToLeft is abs(AlienX - BoundedLeftPos),
+    DistToRight is abs(AlienX - BoundedRightPos),
+    
+    % Assign target based on position - choose the closest target point
+    (DistToCenter =< DistToLeft, DistToCenter =< DistToRight -> TargetPos = CenterPos;
+     DistToLeft =< DistToRight -> TargetPos = BoundedLeftPos;
+     TargetPos = BoundedRightPos),
+    
+    % Only fire if alien is reasonably positioned to hit the target
+    abs(AlienX - TargetPos) < 60,
+    
+    % Add timing element for coordinated firing (computationally simple)
+    % Use alien ID modulo 3 as a timing factor to create a wave-like pattern
+    TimingFactor is AlienID mod 3,
+    random(0, 3, R1),
+    R1 =:= TimingFactor,  % Stagger timing based on alien ID
+    
+    % Base chance is still 10% to maintain game balance
+    random(0, 100, R2),
+    R2 < 90.
 
 % Determine which strategy to use for an alien
 % Now uses row-based strategy assignment
