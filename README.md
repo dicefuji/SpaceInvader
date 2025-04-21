@@ -1,19 +1,31 @@
-# Space Invaders with Prolog AI
+# Space Invaders with Intelligent AI Strategies
 
-A recreation of the classic Space Invaders game with AI opponents controlled through Prolog logic.
+A recreation of the classic Space Invaders game with advanced AI opponents controlled through Prolog-driven strategies.
 
 ## Project Overview
 
-This project features:
-- A Python/Pygame-based Space Invaders game engine
-- Prolog-driven AI for alien invaders
-- CLI-based Prolog bridge for cross-platform compatibility
-- Smooth player movement with dual update system
-- Sprite-based graphics with classic Space Invaders look
-- Multiple AI strategies with different alien behaviors
+This project enhances the classic Space Invaders game with:
+- A Python/Pygame-based game engine with smooth graphics
+- Prolog-driven AI with three distinct intelligent strategies
+- Comprehensive testing tools to evaluate and visualize AI behavior
+- Cross-platform compatibility through CLI-based Prolog integration
+- Detailed statistical analysis of AI performance
+- Row-based strategy assignment for varied gameplay experience
+
+## AI Strategy System
+
+The game features three distinct AI strategies for alien firing behavior:
+
+1. **Direct Targeting**: Top-row aliens fire when the player is directly below them, creating a reactive but predictable pattern.
+
+2. **Predictive Targeting**: Middle-row aliens predict where the player will be based on movement direction, creating a more challenging experience for players who move consistently.
+
+3. **Crossfire Trap Pattern**: Bottom-row aliens coordinate to create a trap zone around the player that dynamically adjusts based on movement, making it difficult to escape bullets by using standard dodging techniques.
 
 ## Project Structure
 
+- `space_invaders.py`: Main game script
+- `strategy_tester.py`: Specialized tool for testing and analyzing AI strategies
 - `engine/`: Core game engine components
   - `entity.py`: Base entity class for all game objects
   - `player.py`: Player spaceship implementation
@@ -26,54 +38,66 @@ This project features:
   - `sprites.py`: Sprite management for game graphics
   
 - `ai/`: Prolog AI integration
-  - `invader_ai.pl`: Prolog knowledge base for alien behaviors
-  - `invader_ai_simple.pl`: Simplified Prolog knowledge base
-  - `prolog_bridge.py`: Python-Prolog integration with PySwip
-  - `cli_prolog_bridge.py`: CLI-based Prolog bridge for better compatibility
+  - `invader_ai.pl`: Main Prolog knowledge base with all three strategies
+  - `strategy_test.pl`: Specialized Prolog file for testing strategies in isolation
+  - `invader_ai_simple.pl`: Simplified Prolog knowledge base for beginners
+  - `cli_prolog_bridge.py`: CLI-based Prolog bridge for cross-platform compatibility
+  - `prolog_bridge.py`: Python-Prolog integration with PySwip (alternative method)
   
 - `assets/`: Game assets (images, sounds)
   - `Graphics/`: Sprite images for aliens and player
   - `Font/`: Game fonts
 
+- `test_prolog_integration.py`: Test script for PySwip Prolog bridge
 - `test_cli_integration.py`: Test script for CLI-based Prolog bridge
-- `test_row_strategies.py`: Tool for testing and analyzing row-based strategies
+- `CROSSFIRE_TRAP_STRATEGY.md`: Documentation for the Crossfire Trap Pattern
+- `AI_STRATEGY_REPORT.md`: Comprehensive report on the AI strategies and testing results
 
 ## Game Features
 
 - Classic Space Invaders gameplay with authentic sprites
 - Ultra-smooth player movement with subframe updates
+- Three distinct AI strategies with different behaviors and challenges
+- Statistical tracking of strategy performance
 - Full game state management (menu, playing, game over)
 - Lives system and scoring
 - Barriers that can be damaged and destroyed
 - Win and lose conditions
-- Standard arcade-style UI
-- Prolog-driven alien behavior
-- Enhanced visual effects for bullets and shots
-- Cross-platform compatibility for macOS, Windows, and Linux
+- Visual effects for hits, explosions, and bullet paths
+- Cross-platform compatibility for macOS (including Apple Silicon), Windows, and Linux
 
 ## Recent Enhancements
 
-1. **Smooth Player Movement**:
-   - Implemented a dual update system for smooth player controls
-   - Player updates at 60fps with sub-frame precision
-   - Maintains classic frame-by-frame alien movement while player moves smoothly
+1. **Advanced AI Strategy System**:
+   - Three distinct AI strategies with different targeting methods
+   - Row-based strategy assignment to create varied gameplay
+   - Dynamic trap zones for coordinated alien firing
+   - Player movement prediction for anticipatory targeting
 
-2. **Sprite-Based Graphics**:
-   - Classic Space Invaders sprites for aliens and player
-   - Three types of aliens with different appearances
-   - Enhanced bullet visuals with distinctive designs
-   - Proper sprite scaling and management
+2. **Strategy Testing Environment**:
+   - Dedicated testing tool with visual feedback
+   - Statistical analysis of hit rates and performance
+   - Real-time visualization of strategy behavior
+   - Configurable player movement patterns
+   - Interactive strategy switching and parameter tuning
 
-3. **Cross-Platform Compatibility**:
-   - CLI-based Prolog bridge for macOS (including Apple Silicon) compatibility
-   - No more dependency on PySwip for Apple Silicon users
-   - Improved error handling and robustness
+3. **Enhanced Visuals and Feedback**:
+   - Improved bullet visibility with visual trails
+   - Hit impact visualization with explosion effects
+   - Color-coded targeting indicators in test mode
+   - Real-time statistical display
 
 4. **Performance Optimizations**:
-   - Enhanced game speed and responsiveness
-   - Optimized collision detection
-   - Sprite caching for better performance
+   - Optimized Prolog queries for better performance
+   - Efficient collision detection
+   - Minimal computational overhead for AI strategies
    - Time-based movement calculations
+
+## Requirements
+
+- Python 3.8+
+- Pygame 2.0+
+- SWI-Prolog 8.2.0+
 
 ## Setup
 
@@ -85,73 +109,87 @@ This project features:
 
 2. Install dependencies:
    ```
-   pip install -r requirements.txt
+   pip install pygame
    ```
 
-3. Install SWI-Prolog from: https://www.swi-prolog.org/download/stable
+3. Install SWI-Prolog from Homebrew
+   ```
+   brew install swi-prolog
+   ```
+   - Ensure the SWI-Prolog executable is in your system PATH
 
 ## Running the Game
 
-### Standard Version (Python-only)
-To play the standard version with hardcoded AI:
-```
-python space_invaders.py
-```
-
-### Prolog AI Version
-To play with Prolog-driven AI (requires SWI-Prolog):
+### Main Game
+To play the game with all three AI strategies:
 ```
 python space_invaders_prolog.py
 ```
 
-### Testing the Strategies
-To analyze and test individual row strategies:
+### Strategy Tester
+To analyze and test individual strategies with visual feedback:
 ```
-python test_row_strategies.py
-```
-
-### Test Scripts
-For testing specific components:
-```
-python test_prolog_integration.py   # Test Prolog integration
-python test_cli_integration.py      # Test CLI-based Prolog bridge
+python strategy_tester.py
 ```
 
 ## Controls
+
+### Main Game
 - Left/Right Arrow: Move player
 - Space: Shoot
-- Enter: Start game / Restart
+- R: Reset game
 - Q: Quit game
 
-## Gameplay Instructions
+### Strategy Tester
+- Left/Right Arrow: Move player (in manual mode)
+- 1-3: Switch between strategies (1: Direct, 2: Predictive, 3: Crossfire Trap)
+- A-D: Change player movement pattern (A: Static, B: Left-Right, C: Random, D: Manual)
+- R: Reset statistics
+- B: Toggle debug mode
+- ESC: Quit tester
 
-1. Press Enter on the main menu to start the game
-2. Use the arrow keys to move and Space to shoot
-3. Destroy all aliens to win
-4. Avoid alien bullets and don't let aliens reach the bottom
-5. Use barriers for protection (they can be destroyed)
-6. The game is over when you run out of lives or aliens reach the bottom
+## Strategy Testing Instructions
+
+The Strategy Tester tool provides a specialized environment for analyzing and comparing the three AI strategies:
+
+1. **Select a Strategy**: Press 1, 2, or 3 to select Direct Targeting, Predictive Targeting, or Crossfire Trap Pattern.
+2. **Choose Movement Pattern**: Press A, S, D, or F to select Static, Left-Right Sweep, Random, or Manual movement.
+3. **Observe Statistics**: Watch the real-time statistics on hit rates, shots fired, and performance.
+4. **Analyze Visualizations**: Each strategy shows different visual indicators:
+   - Direct Targeting: Simple vertical lines
+   - Predictive Targeting: Direction arrows and predicted positions
+   - Crossfire Trap: Color-coded trap zones and targeting assignments
+5. **Reset and Compare**: Press R to reset statistics and compare different strategies.
 
 ## Prolog AI Implementation
 
-The Prolog implementation uses a knowledge base (`ai/invader_ai.pl`) that contains:
-- Facts about the current game state (player position, alien positions, etc.)
-- Rules for alien movement decisions
-- Rules for alien firing decisions with different strategies
-- Helper predicates for decision-making
-- Row-based strategy assignment system
+The Prolog implementation is divided into two parts:
 
-The CLI-based Prolog bridge (`ai/cli_prolog_bridge.py`) handles:
-- Communication between Python and Prolog via command-line interface
-- Serializing game state to Prolog facts
-- Querying Prolog for alien decisions
-- Translating Prolog outputs to game actions
-- Cross-platform compatibility without PySwip
+1. **Main Game Knowledge Base** (`ai/invader_ai.pl`):
+   - Implementation of all three strategies
+   - Row-based strategy assignment
+   - Player movement tracking and prediction
+   - Spatial reasoning for coordinated firing
+
+2. **Testing Knowledge Base** (`ai/strategy_test.pl`):
+   - Enhanced versions of strategies for testing
+   - Configurable parameters for fine-tuning
+   - Debug predicates for visualization
+   - Statistical data generation
+
+The CLI-based Prolog bridge handles communication between Python and Prolog via command-line interface, ensuring cross-platform compatibility.
+
+## Documentation
+
+- `CROSSFIRE_TRAP_STRATEGY.md`: Detailed explanation of the Crossfire Trap Pattern, including its design principles, implementation details, and spatial reasoning.
+- `AI_STRATEGY_REPORT.md`: Comprehensive report on all three strategies, including comparative analysis, test results, and performance metrics.
 
 ## Future Enhancements
 
-- Sound effects and music
-- Additional levels with increasing difficulty
-- More alien types and behaviors
-- Power-ups and special weapons
-- High score saving system
+- Additional AI strategies based on different targeting principles
+- Machine learning integration for adaptive difficulty
+- Enhanced visual effects for strategy visualization
+- Multiple levels with progressive strategy complexity
+- Player skill tracking to adjust strategy parameters
+- Cooperative alien behavior with group formations
+- Sound effects responsive to different strategies

@@ -46,4 +46,4 @@ BULLET_WIDTH = 4
 BULLET_HEIGHT = 10
 
 # Game progression
-ALIEN_SPEED_INCREASE = 0.7 # Increased from 0.2 - How much to increase alien speed when aliens are destroyed 
+ALIEN_SPEED_INCREASE = 1.4 # Increased from 0.2 - How much to increase alien speed when aliens are destroyed 
