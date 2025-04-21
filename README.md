@@ -22,6 +22,12 @@ The game features three distinct AI strategies for alien firing behavior:
 
 3. **Crossfire Trap Pattern**: Bottom-row aliens coordinate to create a trap zone around the player that dynamically adjusts based on movement, making it difficult to escape bullets by using standard dodging techniques.
 
+## Links to Demos
+
+Game: https://drive.google.com/file/d/1tbgtli5ac3EbDxKi75CZNdCqFaZh9gAX/view?usp=drive_link
+
+Testing: https://drive.google.com/file/d/1tG3lIvL6kpQf17icKUFWJs1EX7mN84R2/view?usp=drive_link
+
 ## Project Structure
 
 - `space_invaders.py`: Main game script
@@ -118,6 +124,8 @@ The game features three distinct AI strategies for alien firing behavior:
    ```
    - Ensure the SWI-Prolog executable is in your system PATH
 
+   For other: https://www.swi-prolog.org/download/stable
+
 ## Running the Game
 
 ### Main Game
@@ -178,11 +186,6 @@ The Prolog implementation is divided into two parts:
    - Statistical data generation
 
 The CLI-based Prolog bridge handles communication between Python and Prolog via command-line interface, ensuring cross-platform compatibility.
-
-## Documentation
-
-- `CROSSFIRE_TRAP_STRATEGY.md`: Detailed explanation of the Crossfire Trap Pattern, including its design principles, implementation details, and spatial reasoning.
-- `AI_STRATEGY_REPORT.md`: Comprehensive report on all three strategies, including comparative analysis, test results, and performance metrics.
 
 ## Future Enhancements
 
