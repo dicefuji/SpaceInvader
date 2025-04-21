@@ -74,13 +74,69 @@ should_fire_predictive(AlienID) :-
     random(0, 100, R),
     R < 70.  % Slightly reduced to balance the better targeting
 
-% Strategy 3: Coordinated Firing
-% Only aliens in bottom row of each column fire
+% Strategy 3: Crossfire Trap Pattern
+% Bottom row aliens coordinate to create a trap zone around the player
 should_fire_coordinated(AlienID) :-
-    alien(AlienID, _, AlienY),
+    alien(AlienID, AlienX, AlienY),
+    player(PlayerX, _),
+    
+    % Only bottom-row aliens participate in coordinated firing
     \+ (alien(_, _, Y), Y > AlienY),  % No aliens below this one
-    random(0, 100, R),
-    R < 60.  % Increased from 10% to 60%
+    
+    % Get screen dimensions
+    screen_size(Width, _),
+    
+    % Determine player movement direction
+    (last_player_x(LastX) -> 
+        (PlayerX > LastX -> Direction = 1 ; 
+         PlayerX < LastX -> Direction = -1 ; 
+         Direction = 0),
+        true  % Just use for calculation, don't update here
+        ;
+        Direction = 0,  % Default if no previous position
+        assert(last_player_x(PlayerX))
+    ),
+    
+    % Define the trap zone positions
+    % Central position is the player's current position
+    CenterPos = PlayerX,
+    % Left and right trap positions are offset from player
+    % Wider on the direction of movement to catch the player
+    LeftOffset is 60 + (Direction * -20),  % Wider if moving left
+    RightOffset is 60 + (Direction * 20),  % Wider if moving right
+    LeftPos is PlayerX - LeftOffset,
+    RightPos is PlayerX + RightOffset,
+    
+    % Ensure trap positions are within screen bounds
+    BoundedLeftPos is max(50, LeftPos),
+    BoundedRightPos is min(Width - 50, RightPos),
+    
+    % Assign aliens to different positions in the trap
+    % Based on their position relative to the player
+    (
+        % Aliens directly above player target the player
+        (abs(AlienX - PlayerX) < 100, TargetPos = CenterPos)
+        ;
+        % Aliens to the left set the left trap
+        (AlienX < PlayerX, TargetPos = BoundedLeftPos)
+        ;
+        % Aliens to the right set the right trap
+        (AlienX > PlayerX, TargetPos = BoundedRightPos)
+    ),
+    
+    % Only fire if the alien is in a reasonable position to hit its target
+    abs(AlienX - TargetPos) < 80,  % Wider targeting zone for the trap pattern
+    
+    % Add timing element based on position to create a coordinated trap
+    % Aliens closer to the center fire slightly earlier
+    DistanceToPlayer = abs(AlienX - PlayerX),
+    TimingFactor is DistanceToPlayer mod 3,
+    random(0, 3, R1),
+    R1 =:= TimingFactor,  % Stagger timing for trap effect
+    
+    % Firing probability
+    random(0, 100, R2),
+    R2 < 70.  % High probability for testing
 
 % Main firing decision predicate - for testing well always use the global strategy
 should_alien_fire(AlienID) :-

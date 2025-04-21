@@ -169,7 +169,7 @@ class TestPrologAlienGroup(PrologAlienGroup):
 STRATEGY_NAMES = {
     1: "Direct Targeting",
     2: "Predictive Targeting",
-    3: "Coordinated Firing"
+    3: "Crossfire Trap"
 }
 
 # Player movement patterns
@@ -685,7 +685,7 @@ class StrategyTester:
                         1
                     )
         
-        elif self.current_strategy == 3:  # Coordinated Firing
+        elif self.current_strategy == 3:  # Crossfire Trap Pattern
             # Highlight the "bottom row" aliens which are the ones that will fire
             bottom_aliens = []
             for alien in self.aliens.aliens:
@@ -713,14 +713,136 @@ class StrategyTester:
                     ),
                     2
                 )
-                # Also draw vertical line to show firing area
+            
+            # Visualize the crossfire trap pattern
+            if hasattr(self, 'player_direction') and bottom_aliens:
+                # Get player position and direction
+                player_x = self.player.x
+                direction = self.player_direction
+                
+                # Calculate trap zone positions
+                # Central position is the player's current position
+                center_pos = player_x
+                
+                # Left and right trap positions with dynamic sizing based on movement direction
+                left_offset = 60 + (direction * -20)  # Wider if moving left
+                right_offset = 60 + (direction * 20)  # Wider if moving right
+                left_pos = max(50, player_x - left_offset)
+                right_pos = min(SCREEN_WIDTH - 50, player_x + right_offset)
+                
+                # Draw trap zones
+                # Center trap zone (player position)
+                pygame.draw.circle(
+                    self.screen,
+                    (255, 0, 0),  # Red for center/player position
+                    (center_pos, self.player.y),
+                    10,
+                    2
+                )
+                
+                # Left trap zone
+                pygame.draw.circle(
+                    self.screen,
+                    (255, 165, 0),  # Orange for left trap
+                    (int(left_pos), self.player.y),
+                    15,
+                    2
+                )
+                
+                # Right trap zone
+                pygame.draw.circle(
+                    self.screen,
+                    (255, 165, 0),  # Orange for right trap
+                    (int(right_pos), self.player.y),
+                    15,
+                    2
+                )
+                
+                # Draw trap zone connecting lines
                 pygame.draw.line(
                     self.screen,
-                    (255, 200, 50),  # Orange for coordinated firing
-                    (alien.x + alien.width // 2, alien.y + alien.height),
-                    (alien.x + alien.width // 2, GAME_AREA_BOTTOM),
+                    (255, 100, 100),  # Light red
+                    (center_pos, self.player.y),
+                    (int(left_pos), self.player.y),
                     1
                 )
+                pygame.draw.line(
+                    self.screen,
+                    (255, 100, 100),  # Light red
+                    (center_pos, self.player.y),
+                    (int(right_pos), self.player.y),
+                    1
+                )
+                
+                # Draw trap widths to show dynamic sizing
+                # Add directional indicator to show trap expansion
+                if direction != 0:
+                    arrow_length = 15
+                    arrow_width = 10
+                    
+                    # Direction indicator at right position
+                    if direction > 0:  # Moving right
+                        pygame.draw.polygon(
+                            self.screen,
+                            (255, 200, 100),
+                            [
+                                (int(right_pos) - arrow_width, self.player.y),
+                                (int(right_pos) + arrow_length, self.player.y),
+                                (int(right_pos), self.player.y + arrow_width),
+                            ]
+                        )
+                    else:  # Moving left
+                        pygame.draw.polygon(
+                            self.screen,
+                            (255, 200, 100),
+                            [
+                                (int(left_pos) + arrow_width, self.player.y),
+                                (int(left_pos) - arrow_length, self.player.y),
+                                (int(left_pos), self.player.y + arrow_width),
+                            ]
+                        )
+                
+                # Assign and visualize firing zones for each bottom alien
+                for alien in bottom_aliens:
+                    alien_center_x = alien.x + alien.width // 2
+                    
+                    # Determine target position for this alien
+                    if abs(alien_center_x - player_x) < 100:
+                        # Aliens near center target the player directly
+                        target_pos = center_pos
+                        color = (255, 0, 0)  # Red
+                    elif alien_center_x < player_x:
+                        # Aliens to the left set the left trap
+                        target_pos = left_pos
+                        color = (255, 140, 0)  # Dark orange
+                    else:
+                        # Aliens to the right set the right trap
+                        target_pos = right_pos
+                        color = (255, 140, 0)  # Dark orange
+                    
+                    # Check if alien is well-positioned to hit assigned target
+                    if abs(alien_center_x - target_pos) < 80:
+                        # Draw targeting line from this alien to its assigned target
+                        pygame.draw.line(
+                            self.screen,
+                            color,
+                            (alien_center_x, alien.y + alien.height),
+                            (int(target_pos), self.player.y),
+                            2
+                        )
+                        
+                        # Highlight this alien with its targeting color
+                        pygame.draw.rect(
+                            self.screen,
+                            color,
+                            pygame.Rect(
+                                alien.x - 7, 
+                                alien.y - 7, 
+                                alien.width + 14, 
+                                alien.height + 14
+                            ),
+                            3
+                        )
         
         # Draw controls help
         controls = [
@@ -745,7 +867,7 @@ class StrategyTester:
         strategy_descriptions = {
             1: "Direct Targeting: Aliens fire when player is directly below (±20px)",
             2: "Predictive Targeting: Aliens aim 150px ahead in player's movement direction",
-            3: "Coordinated Firing: Only bottom-row aliens fire (regardless of player)"
+            3: "Crossfire Trap: Aliens create a trap zone that's harder to escape as you move"
         }
         
         if self.current_strategy in strategy_descriptions:
