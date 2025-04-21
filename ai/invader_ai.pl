@@ -9,6 +9,8 @@ Space Invaders AI in Prolog
 :- dynamic barrier/3.        % barrier(ID, X, Y)
 :- dynamic screen_size/2.    % screen_size(Width, Height)
 :- dynamic strategy/1.       % Global strategy selector (for backward compatibility)
+:- dynamic last_player_x/1.  % Track the last player position
+:- dynamic player_direction/1. % Track player movement direction
 
 % Row-based strategy system
 % Each row uses a specific strategy based on its position
@@ -30,18 +32,53 @@ should_fire_direct(AlienID) :-
     random(0, 100, R),
     R < 30.  % 30% chance of firing when player is below
 
-% Strategy 2: Predictive Targeting
-% Aliens try to predict where the player will be
+% Strategy 2: Improved Predictive Targeting
+% Aliens try to predict where the player will be based on movement direction
 should_fire_predictive(AlienID) :-
     alien(AlienID, AlienX, _),
     player(PlayerX, _),
-    % Assume player is moving toward center if far from center
+    
+    % Determine player movement direction based on last position
+    (last_player_x(LastX) -> 
+        (PlayerX > LastX -> Direction = 1 ; 
+         PlayerX < LastX -> Direction = -1 ; 
+         Direction = 0),
+        retract(last_player_x(_)),
+        assert(last_player_x(PlayerX)),
+        % Only update direction if we detect movement
+        (Direction \= 0 -> 
+            (retract(player_direction(_)) -> true ; true),
+            assert(player_direction(Direction))
+            ; true)
+        ;
+        % Initialize if not yet set
+        assert(last_player_x(PlayerX)),
+        assert(player_direction(0))
+    ),
+    
+    % Use the stored direction for prediction
+    player_direction(StoredDirection),
+    
+    % Calculate predicted position with larger offset (150 pixels)
+    % If no movement detected, predict based on position relative to center
+    (StoredDirection \= 0 -> 
+        PredictedX is PlayerX + (StoredDirection * 150)
+        ;
+        % Fallback if no direction detected
+        screen_size(Width, _),
+        ScreenCenter is Width / 2,
+        (PlayerX < ScreenCenter -> PredictedX is PlayerX + 150 ; PredictedX is PlayerX - 150)
+    ),
+    
+    % Ensure prediction is within screen bounds
     screen_size(Width, _),
-    ScreenCenter is Width / 2,
-    (PlayerX < ScreenCenter -> PredictedX is PlayerX + 30 ; PredictedX is PlayerX - 30),
-    abs(AlienX - PredictedX) < 25,
+    BoundedPredictedX is max(50, min(Width - 50, PredictedX)),
+    
+    % Alien aims at the predicted position
+    abs(AlienX - BoundedPredictedX) < 40,  % Widened targeting area
+    
     random(0, 100, R),
-    R < 25.
+    R < 25.  % Keep original 25% chance to avoid making it too difficult
 
 % Strategy 3: Coordinated Firing
 % Only aliens in bottom row of each column fire

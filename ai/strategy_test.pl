@@ -8,7 +8,7 @@ Space Invaders AI Strategy Test File
 :- dynamic bullet/3.         % bullet(Owner, X, Y)
 :- dynamic barrier/3.        % barrier(ID, X, Y)
 :- dynamic screen_size/2.    % screen_size(Width, Height)
-:- dynamic strategy/1.       % Global strategy selector (what we'll use for tests)
+:- dynamic strategy/1.       % Global strategy selector (what well use for tests)
 :- dynamic last_player_x/1.  % Track the last player position
 :- dynamic player_direction/1. % Track player movement direction
 
@@ -82,9 +82,9 @@ should_fire_coordinated(AlienID) :-
     random(0, 100, R),
     R < 60.  % Increased from 10% to 60%
 
-% Main firing decision predicate - for testing we'll always use the global strategy
+% Main firing decision predicate - for testing well always use the global strategy
 should_alien_fire(AlienID) :-
-    strategy(Strategy),  % Get the global strategy we're testing
+    strategy(Strategy),  % Get the global strategy were testing
     alien(AlienID, _, _),  % Alien must exist
     should_alien_fire_with_strategy(AlienID, Strategy).
 
